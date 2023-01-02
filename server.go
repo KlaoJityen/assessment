@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -20,4 +21,5 @@ func main() {
 
 	e.GET("/users", Handler)
 
+	log.Fatal(e.Start(":2565"))
 }
