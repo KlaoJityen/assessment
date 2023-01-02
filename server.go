@@ -1,16 +1,27 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
 )
 
-func Handler(c echo.Context) error {
-	fmt.Println("inside handler")
-	return c.JSON(http.StatusOK, "hello world")
+func getHandler(c echo.Context) error {
+	id := c.Param("id")
+	return c.JSON(http.StatusOK, id)
+}
+
+func createHandler(c echo.Context) error {
+	return c.JSON(http.StatusOK, "create")
+}
+
+func updateHandler(c echo.Context) error {
+	return c.JSON(http.StatusOK, "update")
+}
+
+func getAllHandler(c echo.Context) error {
+	return c.JSON(http.StatusOK, "getAll")
 }
 
 func main() {
@@ -19,7 +30,10 @@ func main() {
 
 	e := echo.New()
 
-	e.GET("/users", Handler)
+	e.GET("/users", getAllHandler)
+	e.GET("/users/:id", getHandler)
+	e.POST("/users", createHandler)
+	e.PUT("/users/:id", updateHandler)
 
 	log.Fatal(e.Start(":2565"))
 }
