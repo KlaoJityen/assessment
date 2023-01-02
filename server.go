@@ -7,6 +7,14 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+type Expense struct {
+	ID     int      `json:"id"`
+	Title  string   `json:"title"`
+	Amount float64  `json:"amount"`
+	Note   string   `json:"note"`
+	Tags   []string `json:"tags"`
+}
+
 func getHandler(c echo.Context) error {
 	id := c.Param("id")
 	return c.JSON(http.StatusOK, id)
