@@ -22,8 +22,29 @@ type Error struct {
 	Message string `json:"message"`
 }
 
-func getAllHandler(c echo.Context) error {
-	return c.JSON(http.StatusOK, "getAll")
+func getExpensesHandler(c echo.Context) error {
+	stmt, err := db.Prepare("SELECT id, title, amount, note, tags FROM expenses ORDER BY id ASC")
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, Error{Message: "can't prepare query for expenses statement:" + err.Error()})
+	}
+
+	rows, err := stmt.Query()
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, Error{Message: "can't query expenses:" + err.Error()})
+	}
+
+	expenses := []Expense{}
+
+	for rows.Next() {
+		expense := Expense{}
+		err := rows.Scan(&expense.ID, &expense.Title, &expense.Amount, &expense.Note, pq.Array(&expense.Tags))
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, Error{Message: "can't scan row:" + err.Error()})
+		}
+		expenses = append(expenses, expense)
+	}
+
+	return c.JSON(http.StatusOK, expenses)
 }
 
 func createExpenseHandler(c echo.Context) error {
@@ -107,7 +128,7 @@ func main() {
 
 	e := echo.New()
 
-	e.GET("/expenses", getAllHandler)
+	e.GET("/expenses", getExpensesHandler)
 	e.GET("/expenses/:id", getExpenseHandler)
 	e.POST("/expenses", createExpenseHandler)
 	e.PUT("/expenses/:id", updateExpenseHandler)
