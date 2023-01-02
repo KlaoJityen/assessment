@@ -43,8 +43,25 @@ func createExpenseHandler(c echo.Context) error {
 
 }
 
-func updateHandler(c echo.Context) error {
-	return c.JSON(http.StatusOK, "update")
+func updateExpenseHandler(c echo.Context) error {
+
+	exp := Expense{}
+	err := c.Bind(&exp)
+
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, Error{Message: err.Error()})
+	}
+
+	stmt, err := db.Prepare("UPDATE expenses SET title=$2, amount=$3, note=$4, tags=$5 WHERE id=$1 RETURNING id, title, amount , note, tags")
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, Error{Message: "can't prepare query expense statment:" + err.Error()})
+	}
+
+	if _, err := stmt.Exec(exp.ID, exp.Title, exp.Amount, exp.Note, pq.Array(exp.Tags)); err != nil {
+		return c.JSON(http.StatusInternalServerError, Error{Message: "can't scan expenses:" + err.Error()})
+	}
+
+	return c.JSON(http.StatusOK, exp)
 }
 
 func getExpenseHandler(c echo.Context) error {
@@ -93,7 +110,7 @@ func main() {
 	e.GET("/expenses", getAllHandler)
 	e.GET("/expenses/:id", getExpenseHandler)
 	e.POST("/expenses", createExpenseHandler)
-	e.PUT("/expenses/:id", updateHandler)
+	e.PUT("/expenses/:id", updateExpenseHandler)
 
 	log.Fatal(e.Start(":2565"))
 }
