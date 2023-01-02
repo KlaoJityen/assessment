@@ -22,9 +22,8 @@ type Error struct {
 	Message string `json:"message"`
 }
 
-func getHandler(c echo.Context) error {
-	id := c.Param("id")
-	return c.JSON(http.StatusOK, id)
+func getAllHandler(c echo.Context) error {
+	return c.JSON(http.StatusOK, "getAll")
 }
 
 func createExpenseHandler(c echo.Context) error {
@@ -48,8 +47,27 @@ func updateHandler(c echo.Context) error {
 	return c.JSON(http.StatusOK, "update")
 }
 
-func getAllHandler(c echo.Context) error {
-	return c.JSON(http.StatusOK, "getAll")
+func getExpenseHandler(c echo.Context) error {
+	id := c.Param("id")
+
+	stmt, err := db.Prepare("SELECT id, title, amount, note, tags FROM expenses WHERE id = $1")
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, Error{Message: "can't prepare query expense statement:" + err.Error()})
+	}
+
+	row := stmt.QueryRow(id)
+
+	e := Expense{}
+	err = row.Scan(&e.ID, &e.Title, &e.Amount, &e.Note, pq.Array(&e.Tags))
+
+	switch err {
+	case sql.ErrNoRows:
+		return c.JSON(http.StatusNotFound, Error{Message: "expense not found"})
+	case nil:
+		return c.JSON(http.StatusOK, e)
+	default:
+		return c.JSON(http.StatusInternalServerError, Error{Message: "can't scan expenses:" + err.Error()})
+	}
 }
 
 var db *sql.DB
@@ -73,7 +91,7 @@ func main() {
 	e := echo.New()
 
 	e.GET("/expenses", getAllHandler)
-	e.GET("/expenses/:id", getHandler)
+	e.GET("/expenses/:id", getExpenseHandler)
 	e.POST("/expenses", createExpenseHandler)
 	e.PUT("/expenses/:id", updateHandler)
 
