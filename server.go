@@ -45,6 +45,13 @@ func main() {
 	}
 	defer db.Close()
 
+	command := "CREATE TABLE IF NOT EXISTS expenses ( id SERIAL PRIMARY KEY, title TEXT, amount FLOAT, note TEXT, tags TEXT[]);"
+
+	_, err = db.Exec(command)
+	if err != nil {
+		log.Fatal("Unable to create table", err)
+	}
+
 	e := echo.New()
 
 	e.GET("/users", getAllHandler)
