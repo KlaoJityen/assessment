@@ -1,10 +1,13 @@
 package main
 
 import (
+	"database/sql"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/labstack/echo/v4"
+	_ "github.com/lib/pq"
 )
 
 type Expense struct {
@@ -32,9 +35,15 @@ func getAllHandler(c echo.Context) error {
 	return c.JSON(http.StatusOK, "getAll")
 }
 
+var db *sql.DB
+
 func main() {
-	// fmt.Println("Please use server.go for main file")
-	// fmt.Println("start at port:", os.Getenv("PORT"))
+	var err error
+	db, err = sql.Open("postgres", os.Getenv("DATABASE_URL"))
+	if err != nil {
+		log.Fatal("Connect to database error", err)
+	}
+	defer db.Close()
 
 	e := echo.New()
 
