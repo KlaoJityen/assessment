@@ -99,14 +99,14 @@ func getExpenseHandler(c echo.Context) error {
 
 	row := stmt.QueryRow(id)
 
-	e := Expense{}
-	err = row.Scan(&e.ID, &e.Title, &e.Amount, &e.Note, pq.Array(&e.Tags))
+	exp := Expense{}
+	err = row.Scan(&exp.ID, &exp.Title, &exp.Amount, &exp.Note, pq.Array(&exp.Tags))
 
 	switch err {
 	case sql.ErrNoRows:
 		return c.JSON(http.StatusNotFound, Error{Message: "expense not found"})
 	case nil:
-		return c.JSON(http.StatusOK, e)
+		return c.JSON(http.StatusOK, exp)
 	default:
 		return c.JSON(http.StatusInternalServerError, Error{Message: "can't scan expenses:" + err.Error()})
 	}
