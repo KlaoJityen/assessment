@@ -14,7 +14,7 @@ func CreateExpenseHandler(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, Error{Message: err.Error()})
 	}
 
-	row := db.QueryRow("INSERT INTO expenses (title, amount,note,tags) values ($1, $2, $3, $4)  RETURNING id", exp.Title, exp.Amount, exp.Note, pq.Array(exp.Tags))
+	row := handler.DB.QueryRow("INSERT INTO expenses (title, amount,note,tags) values ($1, $2, $3, $4)  RETURNING id", exp.Title, exp.Amount, exp.Note, pq.Array(exp.Tags))
 
 	err = row.Scan(&exp.ID)
 	if err != nil {

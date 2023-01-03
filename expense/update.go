@@ -16,7 +16,7 @@ func UpdateExpenseHandler(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, Error{Message: err.Error()})
 	}
 
-	stmt, err := db.Prepare("UPDATE expenses SET title=$2, amount=$3, note=$4, tags=$5 WHERE id=$1 RETURNING id, title, amount , note, tags")
+	stmt, err := handler.DB.Prepare("UPDATE expenses SET title=$2, amount=$3, note=$4, tags=$5 WHERE id=$1 RETURNING id, title, amount , note, tags")
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, Error{Message: "can't prepare query expense statment:" + err.Error()})
 	}

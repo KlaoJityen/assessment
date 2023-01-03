@@ -10,7 +10,7 @@ import (
 )
 
 func GetExpensesHandler(c echo.Context) error {
-	stmt, err := db.Prepare("SELECT id, title, amount, note, tags FROM expenses ORDER BY id ASC")
+	stmt, err := handler.DB.Prepare("SELECT id, title, amount, note, tags FROM expenses ORDER BY id ASC")
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, Error{Message: "can't prepare query for expenses statement:" + err.Error()})
 	}
@@ -40,7 +40,7 @@ func GetExpenseHandler(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, Error{Message: "ID is invalid"})
 	}
 
-	stmt, err := db.Prepare("SELECT id, title, amount, note, tags FROM expenses WHERE id = $1")
+	stmt, err := handler.DB.Prepare("SELECT id, title, amount, note, tags FROM expenses WHERE id = $1")
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, Error{Message: "can't prepare query expense statement:" + err.Error()})
 	}
